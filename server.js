@@ -116,15 +116,16 @@ const csvWriter = createCsvWriter({
 // Your route for exporting data to CSV
 app.get('/export-csv', async (req, res) => {
     try {
-        // Fetch user data from the database (adjust this part based on your data retrieval)
         const userData = await User.find({}, { _id: 0, __v: 0 });
-
-        // Write the data to the CSV file
-        await csvWriter.writeRecords(userData);
-
-        res.status(200).send('Data exported to CSV successfully');
+        if (userData.length) {
+            await csvWriter.writeRecords(userData);
+            res.send('CSV file exported successfully');
+        } else {
+            res.send('No data available to export');
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error exporting data to CSV');
+        console.error('Error exporting CSV:', error);
+        res.status(500).send('Error exporting CSV');
     }
 });
+
