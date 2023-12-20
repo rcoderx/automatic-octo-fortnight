@@ -117,14 +117,18 @@ const csvWriter = createCsvWriter({
 app.get('/export-csv', async (req, res) => {
     try {
         const userData = await User.find({}, { _id: 0, __v: 0 });
+        console.log('Fetched User Data:', userData); // Log the fetched user data
+
         if (userData.length) {
             await csvWriter.writeRecords(userData);
+            console.log('CSV file written successfully'); // Log success message
             res.send('CSV file exported successfully');
         } else {
+            console.log('No data available to export'); // Log if no data is present
             res.send('No data available to export');
         }
     } catch (error) {
-        console.error('Error exporting CSV:', error);
+        console.error('Error exporting CSV:', error); // Log any errors
         res.status(500).send('Error exporting CSV');
     }
 });
