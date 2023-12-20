@@ -102,9 +102,14 @@ const csvHeader = [
     { id: 'referralCount', title: 'Referral Count' }
 ];
 
+const path = require('path');
+
+// Specify the absolute path to your CSV file
+const csvFilePath = path.join(__dirname, 'user_data.csv');
+
 // Create a CSV writer
 const csvWriter = createCsvWriter({
-    path: 'user_data.csv', // Specify the CSV file path
+    path: csvFilePath, // Use the absolute file path
     header: csvHeader
 });
 
