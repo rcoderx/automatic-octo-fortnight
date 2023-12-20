@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const { Parser } = require('json2csv');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -115,21 +116,29 @@ const csvWriter = createCsvWriter({
 
 // Your route for exporting data to CSV
 app.get('/export-csv', async (req, res) => {
+    console.log('Export CSV request received');
     try {
+        console.log('Fetching user data from database');
         const userData = await User.find({}, { _id: 0, __v: 0 });
-        console.log('Fetched User Data:', userData); // Log the fetched user data
+        console.log('Fetched user data:', userData);
 
         if (userData.length) {
-            console.log('Starting CSV writing process');
-            await csvWriter.writeRecords(userData);
-            console.log('CSV file written successfully'); // Log success message
-            res.send('CSV file exported successfully');
+            console.log('Converting user data to CSV format');
+            const json2csvParser = new Parser({ header: true });
+            const csvData = json2csvParser.parse(userData);
+            console.log('CSV data created');
+
+            console.log('Sending CSV data in response');
+            res.setHeader('Content-disposition', 'attachment; filename=users.csv');
+            res.set('Content-Type', 'text/csv');
+            res.status(200).send(csvData);
+            console.log('CSV file sent in response');
         } else {
-            console.log('No data available to export'); // Log if no data is present
+            console.log('No user data available to export');
             res.send('No data available to export');
         }
     } catch (error) {
-        console.error('Error exporting CSV:', error); // Log any errors
+        console.error('Error during CSV export:', error);
         res.status(500).send('Error exporting CSV');
     }
 });
