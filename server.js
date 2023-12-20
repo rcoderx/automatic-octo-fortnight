@@ -1,28 +1,52 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
+const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000; // Use Railway's port or default to 3000
+const port = process.env.PORT || 3000;
+
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const userSchema = new mongoose.Schema({
+    twitterUsername: String,
+    telegramUsername: String,
+    solanaAddress: { type: String, unique: true },
+    referralCount: { type: Number, default: 0 }
+});
+
+const User = mongoose.model('User', userSchema);
 
 app.use(cors({
     origin: 'https://literate-dollop-nine.vercel.app/' // Your frontend domain
 }));
-// Middleware to parse the body of the request
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from the 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.post('/submit', async (req, res) => {
+    try {
+        const { twitterUsername, telegramUsername, userAddress, refereeAddress } = req.body;
+        let user = await User.findOne({ solanaAddress: userAddress });
 
-// Route to display the registration form
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+        if (!user) {
+            user = new User({
+                twitterUsername,
+                telegramUsername,
+                solanaAddress: userAddress,
+                referralCount: 0
+            });
+            await user.save();
 
-// Route to handle form submission
-app.post('/submit', (req, res) => {
-    // ...existing code...
+            if (refereeAddress) {
+                await User.findOneAndUpdate({ solanaAddress: refereeAddress }, { $inc: { referralCount: 1 } });
+            }
+        }
+
+        res.status(200).send('Registration successful');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error during registration');
+    }
 });
 
 app.listen(port, () => {
