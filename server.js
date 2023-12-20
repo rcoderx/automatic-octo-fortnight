@@ -30,6 +30,11 @@ app.post('/submit', async (req, res) => {
         const { twitterUsername, telegramUsername, userAddress, refereeAddress } = req.body;
 
         // Check if user already exists with any of the provided details
+        console.log('Checking for existing user...');
+        console.log('userAddress:', userAddress);
+        console.log('twitterUsername:', twitterUsername);
+        console.log('telegramUsername:', telegramUsername);
+        
         const existingUser = await User.findOne({
             $or: [
                 { solanaAddress: userAddress },
@@ -37,8 +42,11 @@ app.post('/submit', async (req, res) => {
                 { telegramUsername: telegramUsername }
             ]
         });
-
+        
+        console.log('Existing user:', existingUser);
+        
         if (existingUser) {
+            console.log('User already exists with provided details');
             return res.status(400).send('User already exists with provided details');
         }
 
