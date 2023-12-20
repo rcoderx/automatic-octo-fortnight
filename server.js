@@ -24,6 +24,9 @@ const User = mongoose.model('User', userSchema);
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 app.post('/submit', async (req, res) => {
     try {
