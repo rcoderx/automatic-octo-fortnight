@@ -28,20 +28,32 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/submit', async (req, res) => {
     try {
         const { twitterUsername, telegramUsername, userAddress, refereeAddress } = req.body;
-        let user = await User.findOne({ solanaAddress: userAddress });
 
-        if (!user) {
-            user = new User({
-                twitterUsername,
-                telegramUsername,
-                solanaAddress: userAddress,
-                referralCount: 0
-            });
-            await user.save();
+        // Check if user already exists
+        let user = await User.findOne({
+            $or: [
+                { solanaAddress: userAddress },
+                { twitterUsername: twitterUsername },
+                { telegramUsername: telegramUsername }
+            ]
+        });
 
-            if (refereeAddress) {
-                await User.findOneAndUpdate({ solanaAddress: refereeAddress }, { $inc: { referralCount: 1 } });
-            }
+        if (user) {
+            return res.status(400).send('User already exists with provided details');
+        }
+
+        // Create new user
+        user = new User({
+            twitterUsername,
+            telegramUsername,
+            solanaAddress: userAddress,
+            referralCount: 0
+        });
+        await user.save();
+
+        // Update referee's referral count
+        if (refereeAddress) {
+            await User.findOneAndUpdate({ solanaAddress: refereeAddress }, { $inc: { referralCount: 1 } });
         }
 
         res.status(200).send('Registration successful');
@@ -50,7 +62,18 @@ app.post('/submit', async (req, res) => {
         res.status(500).send('Error during registration');
     }
 });
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.get('/referrals/:userAddress', async (req, res) => {
+    try {
+        const userAddress = req.params.userAddress;
+        const user = await User.findOne({ solanaAddress: userAddress });
+        
+        if (user) {
+            res.json({ referralCount: user.referralCount });
+        } else {
+            res.status(404).send('User not found');
+        }
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
 });
+
