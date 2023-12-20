@@ -6,6 +6,10 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors({
+    origin: 'https://literate-dollop-nine.vercel.app/' // Your frontend domain
+}));
+
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -18,9 +22,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-app.use(cors({
-    origin: 'https://literate-dollop-nine.vercel.app/' // Your frontend domain
-}));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/submit', async (req, res) => {
