@@ -42,7 +42,7 @@ app.post('/submit', async (req, res) => {
             return res.status(400).send('User already exists with provided details');
         }
 
-        // Create a new user
+        // Create new user
         const newUser = new User({
             twitterUsername,
             telegramUsername,
@@ -62,7 +62,6 @@ app.post('/submit', async (req, res) => {
         res.status(500).send('Error during registration');
     }
 });
-
 
 
 app.listen(port, () => {
