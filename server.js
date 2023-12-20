@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -90,5 +91,35 @@ app.get('/referrals/:userAddress', async (req, res) => {
         }
     } catch (error) {
         res.status(500).send('Server error');
+    }
+});
+
+// Define the CSV file header
+const csvHeader = [
+    { id: 'twitterUsername', title: 'Twitter Username' },
+    { id: 'telegramUsername', title: 'Telegram Username' },
+    { id: 'solanaAddress', title: 'Solana Address' },
+    { id: 'referralCount', title: 'Referral Count' }
+];
+
+// Create a CSV writer
+const csvWriter = createCsvWriter({
+    path: 'user_data.csv', // Specify the CSV file path
+    header: csvHeader
+});
+
+// Your route for exporting data to CSV
+app.get('/export-csv', async (req, res) => {
+    try {
+        // Fetch user data from the database (adjust this part based on your data retrieval)
+        const userData = await User.find({}, { _id: 0, __v: 0 });
+
+        // Write the data to the CSV file
+        await csvWriter.writeRecords(userData);
+
+        res.status(200).send('Data exported to CSV successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error exporting data to CSV');
     }
 });
