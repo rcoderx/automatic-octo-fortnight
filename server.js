@@ -120,6 +120,7 @@ app.get('/export-csv', async (req, res) => {
         console.log('Fetched User Data:', userData); // Log the fetched user data
 
         if (userData.length) {
+            console.log('Starting CSV writing process');
             await csvWriter.writeRecords(userData);
             console.log('CSV file written successfully'); // Log success message
             res.send('CSV file exported successfully');
