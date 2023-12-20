@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 3000; // Use Railway's port or default to 3000
 
 app.use(cors({
-    origin: 'https://yourfrontenddomain.com' // Your frontend domain
+    origin: 'https://literate-dollop-nine.vercel.app/' // Your frontend domain
 }));
 // Middleware to parse the body of the request
 app.use(bodyParser.urlencoded({ extended: true }));
