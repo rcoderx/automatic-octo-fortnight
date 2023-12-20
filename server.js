@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-    origin: 'https://literate-dollop-nine.vercel.app/' // Your frontend domain
+    origin: 'https://literate-dollop-nine.vercel.app' // Your frontend domain
 }));
 
 // MongoDB connection
